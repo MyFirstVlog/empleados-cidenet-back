@@ -1,7 +1,7 @@
 const {response, request} = require('express') // esto es para poder tener los metodos del res, sin esto no aparecen 
 const bcryptjs = require('bcryptjs')
 const User = require('../models/user') // U mayuscula para crear instancias del modelo es estandar
-
+const { v1: uuidv1 } = require('uuid');
 
 
 
@@ -18,27 +18,45 @@ const usuariosGET = (req = request, res = response) => {
 }
 
 const usuariosPOST = async(req, res = response) => { 
+    let correo = ''
+    const {primerNombre,primerApellido,
+        segundoApellido,otroNombre
+          ,pais,tipoID,numero
+          ,fechaDeIngreso,area,fechaDeRegistro
+          } = req.body 
 
-    const {nombre,correo,password,role} = req.body 
-    const usuario = new User({nombre,correo,password,role})
+    
 
-    //verificar si el correo existe
-    const existeEmail = await User.findOne({correo})
-    if(existeEmail){
-        return res.status(404).json({
-            msg:"email already registered"
-        })
+    if(pais==='CO'){
+        const id = uuidv1().split('-')    
+        correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.co`
+        const usuario = await User.findOne({correo})
+        if(usuario){
+            correo=`${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.co`
+        }
+    }else{
+        const id = uuidv1().split('-')    
+        correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.us`
+        const usuario = await User.findOne({correo})
+        if(usuario){
+            correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.us`
+        }
     }
-    //hash de la contraseña 
-    const salt = bcryptjs.genSaltSync()
-    usuario.password = bcryptjs.hashSync(password,salt)
-    //Guargar en db
-    await usuario.save()
 
+    const user = new User({primerNombre,primerApellido,
+        segundoApellido,otroNombre
+          ,correo,pais,tipoID,numero
+          ,fechaDeIngreso,area,fechaDeRegistro
+          })
+
+    
+
+    user.save()
+    
     res.json(
         {
             msg: 'post API - controller',
-            usuario
+            user
         }
     )
 }

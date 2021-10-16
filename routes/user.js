@@ -3,6 +3,8 @@
 const {Router} = require('express')
 const {check} = require('express-validator')
 const { usuariosGET, usuariosPUT, usuariosPOST, usuariosDELETE, usuariosPATCH } = require('../controllers/users')
+const { existeUsuarioPorID } = require('../helpers/db-validators')
+const existeUsuario = require('../helpers/validarID')
 const { validarCampos } = require('../middlewares/validar-campos')
 const Role = require('../models/role')
 
@@ -14,16 +16,32 @@ router.put('/:id',usuariosPUT)
 //los checks son middlewares de verificacion,(recordar que tiene el next que hace pasar de middleware)
 //el validorCampos, si no paso no llega si quiera a ejecutar el callback del post
 router.post('/',[
-    check('correo', 'el correo no es valido').isEmail(),
-    check('nombre', 'el nombre es obligatorio').not().isEmpty(),
-    check('password', 'la contraseña es obligatoria y debe contener mas de 6 caracteres').isLength({min : 6}),
-    //check('role', 'No es un rol permitido').isIn(['ADMIN_ROLE', 'USER_ROLE']), -> se debe validar sobre una lista dinamica en una db
-    check('role').custom(async(rol='') => {
-        const existeRol = await Role.findOne({rol})
-        if(!existeRol){
-            throw new Error(`El rol: ${rol} no esta definido en la base de datos`)
-        }
-    }),
+    
+    check('primerNombre', 'el nombre es obligatorio').not().isEmpty(),
+    check('primerNombre', 'el nombre debe tener maximo 20 caracteres').isLength({max:20}),
+
+    check('primerApellido', 'el primer apellido es obligatorio').not().isEmpty(),
+    check('primerApellido', 'el primer apellido debe tener maximo 20 caracteres').isLength({max:20}),
+
+    check('segundoApellido', 'el segundo apellido es obligatorio').not().isEmpty(),
+    check('segundoApellido', 'el segundo pellido debe tener maximo 20 caracteres').isLength({max:20}),
+
+    check('otroNombre', 'el otro nombre debe tener maximo 50 caracteres').isLength({max:50}),
+
+    check('pais', 'el pais es obligatorio').not().isEmpty(),
+
+
+    check('tipoID', 'el tipoID es obligatorio').not().isEmpty(),
+    
+    check('numero', 'el tipoID es obligatorio').not().isEmpty(),
+    check('numero', 'el tipoID debe tener minimo 6 caracteres').isLength({min:6}),
+    check('numero').custom((numero)=>existeUsuarioPorID(numero)),
+    
+
+    check('fechaDeIngreso', 'el tipoID es obligatorio').not().isEmpty(),
+    check('area', 'el tipoID es obligatorio').not().isEmpty(),
+    check('fechaDeRegistro', 'el tipoID es obligatorio').not().isEmpty(),
+
     validarCampos
 
 ] 
@@ -32,3 +50,18 @@ router.delete('/', usuariosDELETE)
 router.patch('/', usuariosPATCH)
 
 module.exports = router
+
+
+/***
+ * 
+ * check('role').custom(async(rol='') => {
+        const existeRol = await Role.findOne({rol})
+        if(!existeRol){
+            throw new Error(`El rol: ${rol} no esta definido en la base de datos`)
+        }
+    }),
+
+
+    
+    //check('role', 'No es un rol permitido').isIn(['ADMIN_ROLE', 'USER_ROLE']), -> se debe validar sobre una lista dinamica en una db
+ */
