@@ -8,6 +8,7 @@ class Server {
         this.port = process.env.PORT
         
         this.usersRoutes = '/api/users'
+        this.search = '/api/search'
 
         //Conectar a base de datos
         this.dbConnection()
@@ -32,6 +33,7 @@ class Server {
 
     routes(){
         this.app.use(this.usersRoutes, require('../routes/user'))
+        this.app.use(this.search, require('../routes/search'))
     }
 
     listen(){

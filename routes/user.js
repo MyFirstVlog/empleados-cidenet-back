@@ -4,7 +4,6 @@ const {Router} = require('express')
 const {check} = require('express-validator')
 const { usuariosGET, usuariosPUT, usuariosPOST, usuariosDELETE, usuariosPATCH } = require('../controllers/users')
 const { existeUsuarioPorID } = require('../helpers/db-validators')
-const existeUsuario = require('../helpers/validarID')
 const { validarCampos } = require('../middlewares/validar-campos')
 const Role = require('../models/role')
 
@@ -34,7 +33,7 @@ router.post('/',[
     check('tipoID', 'el tipoID es obligatorio').not().isEmpty(),
     
     check('numero', 'el tipoID es obligatorio').not().isEmpty(),
-    check('numero', 'el tipoID debe tener minimo 6 caracteres').isLength({min:6}),
+    check('numero', 'La ID debe tener minimo 6 caracteres').isLength({min:6}),
     check('numero').custom((numero)=>existeUsuarioPorID(numero)),
     
 
@@ -46,8 +45,12 @@ router.post('/',[
 
 ] 
 , usuariosPOST)
-router.delete('/', usuariosDELETE)
-router.patch('/', usuariosPATCH)
+router.delete('/:id',[
+    check('id', 'No es un id Valido').isMongoId(),
+    check('id').custom((id)=> existeUsuarioVerificacion(id))
+
+], usuariosDELETE)
+
 
 module.exports = router
 

@@ -1,58 +1,64 @@
-const {response, request} = require('express') // esto es para poder tener los metodos del res, sin esto no aparecen 
+const { response, request } = require('express') // esto es para poder tener los metodos del res, sin esto no aparecen 
 const bcryptjs = require('bcryptjs')
 const User = require('../models/user') // U mayuscula para crear instancias del modelo es estandar
 const { v1: uuidv1 } = require('uuid');
 
 
 
-const usuariosGET = (req = request, res = response) => { 
-    const {nombre,apellido,edad} = req.query
+const usuariosGET = async (req = request, res = response) => {
+    const { limite = 10, desde = 0 } = req.query
+
+    const [total, usuarios] = await Promise.all([
+        User.countDocuments({ estado: true }),
+        User.find({ estado: true })
+            .skip(Number(desde))
+            .limit(Number(limite))
+    ])
     res.json(
         {
-            msg: 'get API - controller',
-            nombre,
-            apellido,
-            edad
+            total,
+            usuarios
         }
     )
 }
 
-const usuariosPOST = async(req, res = response) => { 
+const usuariosPOST = async (req, res = response) => {
     let correo = ''
-    const {primerNombre,primerApellido,
-        segundoApellido,otroNombre
-          ,pais,tipoID,numero
-          ,fechaDeIngreso,area,fechaDeRegistro
-          } = req.body 
+    const { primerNombre, primerApellido,
+        segundoApellido, otroNombre
+        , pais, tipoID, numero
+        , fechaDeIngreso, area, fechaDeRegistro
+    } = req.body
 
-    
 
-    if(pais==='CO'){
-        const id = uuidv1().split('-')    
+
+    if (pais === 'CO') {
+        const id = uuidv1().split('-')
         correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.co`
-        const usuario = await User.findOne({correo})
-        if(usuario){
-            correo=`${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.co`
+        const usuario = await User.findOne({ correo })
+        if (usuario) {
+            correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.co`
         }
-    }else{
-        const id = uuidv1().split('-')    
+    } else {
+        const id = uuidv1().split('-')
         correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.us`
-        const usuario = await User.findOne({correo})
-        if(usuario){
+        const usuario = await User.findOne({ correo })
+        if (usuario) {
             correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.us`
         }
     }
 
-    const user = new User({primerNombre,primerApellido,
-        segundoApellido,otroNombre
-          ,correo,pais,tipoID,numero
-          ,fechaDeIngreso,area,fechaDeRegistro
-          })
+    const user = new User({
+        primerNombre, primerApellido,
+        segundoApellido, otroNombre
+        , correo, pais, tipoID, numero
+        , fechaDeIngreso, area, fechaDeRegistro
+    })
 
-    
+
 
     user.save()
-    
+
     res.json(
         {
             msg: 'post API - controller',
@@ -61,35 +67,72 @@ const usuariosPOST = async(req, res = response) => {
     )
 }
 
-const usuariosPUT = (req, res = response) => { 
+const usuariosPUT = async (req, res = response) => {
+    let correo = ''
+    const { id } = req.params
+    const {fechaDeRegistro,primerNombre,primerApellido,pais, ...resto} = req.body
 
-    const idURL = req.params.id
+    const usuarioVerificacion = await User.findOne({numero : id})
+
+    if(primerNombre !== usuarioVerificacion.primerNombre || primerApellido !== usuarioVerificacion.primerApellido ){
+        if (pais === 'CO') {
+            const id = uuidv1().split('-')
+            correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.co`
+            const usuario = await User.findOne({ correo })
+            if (usuario) {
+                correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.co`
+            }
+        } else {
+            const id = uuidv1().split('-')
+            correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.us`
+            const usuario = await User.findOne({ correo })
+            if (usuario) {
+                correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}.${id[0]}@cidenet.com.us`
+            }
+        }
+    }
+
+    const usuarioUpdated = {
+        primerNombre,
+        primerApellido,
+        fechaDeEdicion : new Date(),
+        pais,
+        correo,
+        ...resto
+    }
+
+    const usuarioActualizar = await User.findOneAndUpdate({numero:id}, usuarioUpdated)
+
+
     res.json(
         {
             msg: 'put API - controller',
-            idURL
+            usuarioActualizar
         }
     )
 }
 
-const usuariosDELETE = (req, res = response) => { 
+const usuariosDELETE = async (req, res = response) => {
+
+    const { id } = req.params
+
+    const usuario = await User.findOneAndUpdate({ numero: id }, { estado: false })
+
+    res.json({
+        msg: "Usuario Eliminado",
+        usuario
+    })
+
+
     res.json(
         {
             msg: 'delete API - controller'
         }
     )
 }
-const usuariosPATCH = (req, res = response) => { 
-    res.json(
-        {
-            msg: 'patch API - controller'
-        }
-    )
-}
 
-module.exports= {
+module.exports = {
     usuariosGET,
-    usuariosPATCH,
     usuariosDELETE,
     usuariosPOST,
     usuariosPUT

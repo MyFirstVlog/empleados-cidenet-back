@@ -47,6 +47,10 @@ const  userSchema = Schema ({
         type: Date,
         required : [true, "Fecha de registro no esta siendo enviado por front-end"]
     },
+    fechaDeEdicion:{
+        type: Date,
+        required : [true, "Fecha de edicion no esta siendo enviado por front-end"]
+    },
 
 })
 
