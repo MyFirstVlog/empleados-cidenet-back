@@ -32,7 +32,7 @@ const  userSchema = Schema ({
         unique : true
     },
     fechaDeIngreso:{
-        type: Date,
+        type: String,
         required : [true, "Fecha de ingreso obligatoria"]
     },
     area:{
@@ -44,12 +44,12 @@ const  userSchema = Schema ({
         default : true,
     },
     fechaDeRegistro:{
-        type: Date,
+        type: String,
         required : [true, "Fecha de registro no esta siendo enviado por front-end"]
     },
     fechaDeEdicion:{
-        type: Date,
-        required : [true, "Fecha de edicion no esta siendo enviado por front-end"]
+        type: String,
+        
     },
 
 })

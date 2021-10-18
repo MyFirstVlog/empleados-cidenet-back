@@ -47,7 +47,7 @@ const buscarFiltro = async (coleccion = '' ,termino = '' ,res = response) => {
         case 'primerApellido': 
              usuarios = await User.find({
                 $or : [
-                    {primerApeliido : regexp},
+                    {primerApellido : regexp},
                 ]
             })
         
@@ -126,63 +126,9 @@ const buscarFiltro = async (coleccion = '' ,termino = '' ,res = response) => {
                 msg : 'olvide hacer esta busqueda'
             })
     }
-
-
-
-
     
 }
 
-const buscarFiltroOtroNombre = async ( termino = '' ,res = response) => {
-    
-    const regexp = new RegExp(termino, 'i')
-    console.log({regexp})
-
-    const usuarios = await User.find({
-        $or : [
-            {otroNombre : regexp},
-        ],
-        $and : [{estado : true}]
-    })
-
-    res.json({
-        results: usuarios
-    })
-}
-
-const buscarFiltroPrimerApellido = async ( termino = '' ,res = response) => {
-    
-    const regexp = new RegExp(termino, 'i')
-    console.log({regexp})
-
-    const usuarios = await User.find({
-        $or : [
-            {primerApellido : regexp},
-        ],
-        $and : [{estado : true}]
-    })
-
-    res.json({
-        results: usuarios
-    })
-}
-
-const buscarFiltroSegundoApellido = async ( termino = '' ,res = response) => {
-    
-    const regexp = new RegExp(termino, 'i')
-    console.log({regexp})
-
-    const usuarios = await User.find({
-        $or : [
-            {segundoApellido : regexp},
-        ],
-        $and : [{estado : true}]
-    })
-
-    res.json({
-        results: usuarios
-    })
-}
 
 const buscar = (req, res = response) => {
 

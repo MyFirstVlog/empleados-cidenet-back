@@ -6,7 +6,7 @@ const { v1: uuidv1 } = require('uuid');
 
 
 const usuariosGET = async (req = request, res = response) => {
-    const { limite = 10, desde = 0 } = req.query
+    const { limite = 5, desde = 0 } = req.query
 
     const [total, usuarios] = await Promise.all([
         User.countDocuments({ estado: true }),
@@ -52,7 +52,8 @@ const usuariosPOST = async (req, res = response) => {
         primerNombre, primerApellido,
         segundoApellido, otroNombre
         , correo, pais, tipoID, numero
-        , fechaDeIngreso, area, fechaDeRegistro
+        , fechaDeIngreso, area, fechaDeRegistro,
+        fechaDeEdicion : new Date().toISOString().slice(0, 10),
     })
 
 
@@ -95,7 +96,7 @@ const usuariosPUT = async (req, res = response) => {
     const usuarioUpdated = {
         primerNombre,
         primerApellido,
-        fechaDeEdicion : new Date(),
+        fechaDeEdicion : new Date().toISOString().slice(0, 10),
         pais,
         correo,
         ...resto
