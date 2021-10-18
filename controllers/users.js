@@ -74,8 +74,7 @@ const usuariosPUT = async (req, res = response) => {
     const {fechaDeRegistro,primerNombre,primerApellido,pais, ...resto} = req.body
 
     const usuarioVerificacion = await User.findOne({numero : id})
-
-    if(primerNombre !== usuarioVerificacion.primerNombre || primerApellido !== usuarioVerificacion.primerApellido ){
+    if(primerNombre != usuarioVerificacion.primerNombre || primerApellido != usuarioVerificacion.primerApellido  || pais != usuarioVerificacion.pais){
         if (pais === 'CO') {
             const id = uuidv1().split('-')
             correo = `${primerNombre.replace(/ /g, "")}.${primerApellido.replace(/ /g, "")}@cidenet.com.co`
@@ -124,12 +123,6 @@ const usuariosDELETE = async (req, res = response) => {
         usuario
     })
 
-
-    res.json(
-        {
-            msg: 'delete API - controller'
-        }
-    )
 }
 
 module.exports = {
